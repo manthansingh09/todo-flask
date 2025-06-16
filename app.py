@@ -3,10 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with a strong key in production
-
-# Initialize the database and create tables if they don't exist
+# Initialize DB if it doesn't exist
 def init_db():
     with sqlite3.connect('todo.db') as conn:
         c = conn.cursor()
@@ -22,11 +19,12 @@ def init_db():
                         FOREIGN KEY(user_id) REFERENCES users(id))''')
         conn.commit()
 
-# Automatically run init_db before the first request
-@app.before_first_request
-def setup():
-    if not os.path.exists('todo.db'):
-        init_db()
+# Auto-create DB before app starts
+if not os.path.exists('todo.db'):
+    init_db()
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Replace this with a strong key in production
 
 @app.route('/')
 def index():
